@@ -1,0 +1,46 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>CDS subsequence inserter</title>
+    <link rel="stylesheet" href="re.css">
+</head>
+<body>
+    <div id="wrapper"><div id="wrapper-pad">
+        <div class="header">
+            <span>Enter <input type="radio" id="in-prot-radio" name="input-type"><label for="in-prot-radio">protein</label> or<br/>
+            <input type="radio" id="in-cds-radio" name="input-type" checked><label for="in-cds-radio">coding sequence</label><span class="rev-comp-link">
+            <br>(<span class="action-link" onclick="rev_comp_input()">reverse complement<br>the input</span>)</span>:</span>
+            <textarea id="in-seq"></textarea>
+            <div id="calculate-wrapper"><button id="calculate" onclick="calculate()">Insert sequences</button></div>
+        </div>
+        <div class="body">
+            <table id="results"></table>
+            <div class="body-right">
+                <div>Try to insert:</div>
+                <div><input type="radio" name="re-or-seq" id="custom-seq-radio"><label for="custom-seq-radio">Your sequences:</label></div>
+                <textarea id="custom-seq" placeholder="GGTCTC&#013;RGGNCCY etc." onclick="document.getElementById('custom-seq-radio').checked = true"></textarea>
+                <div><input type="radio" name="re-or-seq" id="re-radio" checked><label for="re-radio">Restriction enzyme sites:<br/>
+                    <span style="font-size: 12pt; line-height: normal;">
+                    All enzymes (<span data-subset="all" onclick="select_subset(this)" class="action-link">add</span> / <span data-subset="all" onclick="deselect_subset(this)" class="action-link">remove</span>),
+                    6+ sites (<span data-subset="6-plus" onclick="select_subset(this)" class="action-link">add</span> / <span data-subset="6-plus" onclick="deselect_subset(this)" class="action-link">remove</span>),
+                    5- sites (<span data-subset="5-minus" onclick="select_subset(this)" class="action-link">add</span> / <span data-subset="5-minus" onclick="deselect_subset(this)" class="action-link">remove</span>),
+                    type IIS (<span data-subset="IIS" onclick="select_subset(this)" class="action-link">add</span> / <span data-subset="IIS" onclick="deselect_subset(this)"" class="action-link">remove</span>),
+                    NEB (<span data-subset="NEB" onclick="select_subset(this)" class="action-link">add</span>),
+                    NEB HF (<span data-subset="NEB-HF" onclick="select_subset(this)" class="action-link">add</span>),
+                    Thermo (<span data-subset="Thermo" onclick="select_subset(this)" class="action-link">add</span>),
+                    Thermo FD (<span data-subset="Thermo-FD" onclick="select_subset(this)" class="action-link">add</span>),
+                    Thermo Anza (<span data-subset="Thermo-Anza" onclick="select_subset(this)" class="action-link">add</span>),
+                    SibEnzyme (<span data-subset="SibEnzyme" onclick="select_subset(this)" class="action-link">add</span>),
+                    SibEnzyme Turbo (<span data-subset="SibEnzyme-Turbo" onclick="select_subset(this)" class="action-link">add</span>).
+                </span></label></div>
+                <table id="restriction-enzymes" style="display: block; overflow-y: scroll;"></table>
+            </div>
+        </div>
+    </div></div>
+    <div id="crosshair"></div>
+    <script src="re_list.js"></script>
+    <script src="fit_restriction_site.js"></script>
+    <script src="re.js"></script>
+</body>
+</html>

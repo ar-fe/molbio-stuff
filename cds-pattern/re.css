@@ -1,0 +1,162 @@
+﻿body {
+    margin: 0;
+    box-sizing: content-box;
+    display: flex;
+    flex-direction: column;
+    font-size: 14pt;
+    font-family: Arial, Helvetica, sans-serif;
+}
+#wrapper {
+    width: 100%;
+    height: 100vh;
+}
+#wrapper-pad {
+    padding: 4%;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5em
+}
+#calculate-wrapper {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+#calculate {
+    height: 6vh;
+    font-size: 14pt;
+    width: 80%;
+}
+textarea {
+    font-size: 14pt;
+}
+#in-seq {
+    resize: none;
+    height: 100%;
+    flex-grow: 10;
+    font-size: 12pt;
+} 
+div {
+    flex-direction: row;
+}
+.header {
+    width: 100%;
+    height: 10vh;
+    display: flex;
+    align-items: center;
+    gap: 1em;
+}
+.rev-comp-link {
+    display: none;
+}
+input#in-cds-radio:checked ~ .rev-comp-link {
+    display: inline;
+}
+.body {
+    flex-direction: row;
+    display: flex;
+    gap: 1em;
+}
+.body-right {
+    width: 20%;
+    height: 70vh;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5em;
+}
+#custom-seq {
+    resize: none;
+    width: 100%;
+    min-height: 5ex;
+}
+span.highlight {
+    background-color: greenyellow;
+}
+table#results {
+    display: block;
+    overflow: scroll;
+    height: 70vh;
+    font-family: monospace;
+    font-size: 12pt;
+    white-space: pre;
+    width: 80%;
+    border-collapse: collapse;
+}
+table#results > tr:first-child {
+    background-color: white;
+}
+table#results > tr:first-child > th:first-child {
+    background-color: white;
+    z-index: 4;
+    left: 0;
+}
+table#results > tr:first-child > th {
+    padding-bottom: 5px;
+}
+#results th {
+    top: 0;
+    position: sticky;
+    background-color: white;
+    z-index: 3;
+}
+tr > td:first-child {
+    left: 0;
+    position: sticky;
+    background-color: white;
+    z-index: 2;
+    padding-left: 0.5em;
+    padding-right: 0.5em;
+    white-space: nowrap;
+}
+tr:not(:first-child) {
+    box-sizing: border-box;
+    border-top: 1px solid rgba(0,0,0,0.15);
+    border-bottom: 1px solid rgba(0,0,0,0.15);
+}
+#results tr > td:first-child {
+    font-weight: bold;
+}
+#restriction-enzymes td {
+    padding-left: 0;
+}
+th {
+    text-align: left;
+}
+th#table-topleft {
+    font-family: Arial;
+    font-weight: normal;
+    font-size: 10pt;
+    text-align: center;
+    vertical-align: bottom;
+    padding-right: 0.2em
+}
+label {
+    padding-left: 0.2em;
+}
+button {
+    user-select: none;
+}
+.action-link {
+    color: dodgerblue;
+    text-decoration: 1px dashed underline;
+    cursor: pointer;
+    user-select: none;
+}
+.action-link:hover {
+    color: royalblue;
+}
+#crosshair {
+    display: none;
+    position: absolute;
+    top: 100px;
+    left: 100px;
+    height: 500px;
+    font-family: monospace;
+    font-size: 12pt;
+    width: 1ch;
+    background-color: rgba(0,0,0,0.04);
+    z-index: 999;
+    pointer-events: none;
+    border-left: 1px solid rgba(0,0,0,0.15);
+    border-right: 1px solid rgba(0,0,0,0.15);
+}
