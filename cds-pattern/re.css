@@ -44,7 +44,9 @@ div {
     height: 10vh;
     display: flex;
     align-items: center;
-    gap: 1em;
+}
+.prompt {
+    max-width: 12.5em;
 }
 .rev-comp-link {
     display: none;
@@ -65,9 +67,10 @@ input#in-cds-radio:checked ~ .rev-comp-link {
     gap: 0.5em;
 }
 #custom-seq {
-    resize: none;
+    resize: vertical;
+    box-sizing: border-box;
     width: 100%;
-    min-height: 5ex;
+    min-height: 5.5ex;
 }
 span.highlight {
     background-color: greenyellow;
@@ -116,6 +119,9 @@ tr:not(:first-child) {
 #results tr > td:first-child {
     font-weight: bold;
 }
+#restriction-enzymes {
+    flex: 1;
+}
 #restriction-enzymes td {
     padding-left: 0;
 }
@@ -132,6 +138,9 @@ th#table-topleft {
 }
 label {
     padding-left: 0.2em;
+}
+.noselect {
+    user-select: none;
 }
 button {
     user-select: none;

@@ -89,6 +89,8 @@ function calculate() {
     
     let results_table = document.getElementById('results')
     results_table.innerHTML = ''
+    if (cds == '' || Object.keys(patterns).length == 0)
+        return
     results_table.appendChild(table_header(cds))
 
     let found_seqs = []
@@ -138,6 +140,18 @@ crosshair.style.width = crosshair_w + 'px'
 let drag_start = 0
 let dragging = false
 
+document.querySelectorAll('body, textarea').forEach(el => {
+    el.addEventListener('keypress', e => {
+        if (e.key == 'Enter' && !e.shiftKey) {
+            calculate()
+            e.preventDefault()
+        }
+    })
+})
+document.getElementById('restriction-enzymes').addEventListener('click', e => {
+    if (e.button != 0) return;
+    document.getElementById('re-radio').checked = true
+})
 document.getElementById('results').addEventListener('mousemove', function (e) {
     if (dragging) {
         let left = Math.min(e.clientX, drag_start)

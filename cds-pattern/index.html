@@ -8,19 +8,19 @@
 <body>
     <div id="wrapper"><div id="wrapper-pad">
         <div class="header">
-            <span>Enter <input type="radio" id="in-prot-radio" name="input-type"><label for="in-prot-radio">protein</label> or<br/>
+            <div class="prompt noselect">Enter <input type="radio" id="in-prot-radio" name="input-type"><label for="in-prot-radio">protein (single-letter code)</label> or
             <input type="radio" id="in-cds-radio" name="input-type" checked><label for="in-cds-radio">coding sequence</label><span class="rev-comp-link">
-            <br>(<span class="action-link" onclick="rev_comp_input()">reverse complement<br>the input</span>)</span>:</span>
-            <textarea id="in-seq"></textarea>
+            (<span class="action-link" onclick="rev_comp_input()">reverse complement the input</span>)</span>:</div>
+            <textarea id="in-seq" placeholder="Original sequence. Press Enter to calculate, Shift-Enter to add a new line."></textarea>
             <div id="calculate-wrapper"><button id="calculate" onclick="calculate()">Insert sequences</button></div>
         </div>
         <div class="body">
             <table id="results"></table>
             <div class="body-right">
-                <div>Try to insert:</div>
-                <div><input type="radio" name="re-or-seq" id="custom-seq-radio"><label for="custom-seq-radio">Your sequences:</label></div>
+                <div class="noselect">Try to insert:</div>
+                <div class="noselect"><input type="radio" name="re-or-seq" id="custom-seq-radio"><label for="custom-seq-radio">Your sequences:</label></div>
                 <textarea id="custom-seq" placeholder="GGTCTC&#013;RGGNCCY etc." onclick="document.getElementById('custom-seq-radio').checked = true"></textarea>
-                <div><input type="radio" name="re-or-seq" id="re-radio" checked><label for="re-radio">Restriction enzyme sites:<br/>
+                <div class="noselect"><input type="radio" name="re-or-seq" id="re-radio" checked><label for="re-radio">Restriction enzyme sites:<br/>
                     <span style="font-size: 12pt; line-height: normal;">
                     All enzymes (<span data-subset="all" onclick="select_subset(this)" class="action-link">add</span> / <span data-subset="all" onclick="deselect_subset(this)" class="action-link">remove</span>),
                     6+ sites (<span data-subset="6-plus" onclick="select_subset(this)" class="action-link">add</span> / <span data-subset="6-plus" onclick="deselect_subset(this)" class="action-link">remove</span>),
