@@ -1,5 +1,21 @@
 ﻿
-function table_header(seq) {
+function make_codes_table() {
+    let select = document.querySelector('#gen-code')
+    let optgroup = select.querySelector('optgroup')
+
+    for (taxon of codon_freqs) {
+        let {taxid, name, freqs} = taxon
+        optgroup.innerHTML += `<option data-transl-table="1" data-taxid="${taxid}">1. Standard (${name})</option>`
+    }
+    for (id in transl_tables) {
+        if (id == 1) continue;
+        select.innerHTML += `<option data-transl-table="${id}">${id}. ${transl_table_names[id]}</option>`
+    }
+}
+
+make_codes_table()
+
+function table_header(seq, translated) {
     const clustalX_colorscheme = {
         '*': '#ffffff',
         'A': '#80a0f0', 'D': '#c048c0', 'W': '#80a0f0', 'C': '#f08080',
@@ -9,7 +25,6 @@ function table_header(seq) {
         'F': '#80a0f0', 'T': '#15c015', 'E': '#c048c0', 'Y': '#15a4a4',
     }
     let numbers = ''
-    let translated = translate(seq)
     let start_pos = 1
     for (let i = start_pos; i <= translated.length + start_pos - 1; i += 5) {
         let s = String(i)
@@ -35,82 +50,127 @@ function table_header(seq) {
     return tr
 }
 
-function result_tr(seq, re_name, fit) {
-    function highlight_site(seq, pos, site) {
-        return seq.substring(0, pos) +
-            '<span class="highlight">' +
-            site +
-            '</span>' +
-            seq.substring(pos + site.length)
-    }
-    let tr = document.createElement('tr')
-    tr.innerHTML = 
-        `<td><span class="action-link" onclick="scroll_to_match(this)" title="${restriction_enzymes[re_name]}">` + re_name + '</span></td>' +
-        '<td>' + highlight_site(seq, fit.pos, fit.seq) + '</td>'
-    return tr
-}
-
 function get_input_filtered(id, filter) {
     let input = document.getElementById('in-seq').value.toUpperCase()
     return input.split('').filter(c => filter.includes(c)).join('')
 }
-function get_input_cds(id) {
-    return get_input_filtered(id, 'AGTC')
-}
-function get_input_prot(id) {
-    return get_input_filtered(id, 'ACDEFGHIKLMNPQRSTVWY')
-}
 
-function calculate() {
+function get_input_cds(code) {
     let input_type = document.querySelector('input[name="input-type"]:checked').id
     let cds = ''
     if (input_type == 'in-prot-radio') {
-        const prot = get_input_prot('in-seq')
-        cds = back_translate(prot)
+        const prot = get_input_filtered('in-seq', 'ACDEFGHIKLMNPQRSTVWY')
+        cds = code.back_translate(prot)
     } else {
-        cds = get_input_cds('in-seq')
+        cds = get_input_filtered('in-seq', 'AGTC')
         cds = cds.substring(0, cds.length - cds.length % 3)
+        if (document.getElementById('codon-optimize').checked)
+            cds = code.back_translate(code.translate(cds))
     }
+    return cds
+}
 
-    let add_rev_comp = true
-    let patterns = {}
-    if (document.querySelector('#custom-seq-radio').checked) 
-    {
-        let patterns_in = document.querySelector('#custom-seq').value
-            .toUpperCase().split('\n')
-            .map(line => line.split('').filter(c => 'AGTCRYSWKMBVDHN'.includes(c)).join(''))
-            .filter(pattern => pattern != '')
-        patterns = Object.fromEntries(patterns_in.map(p => [p, p]))
-        add_rev_comp = false
-    } else {
-        // get selected REs
-        patterns = Object.fromEntries(Array.from(document.querySelectorAll('#restriction-enzymes input:checked')).map(el => [el.id, restriction_enzymes[el.id]]))
+function get_input_patterns() {
+    function filter_seq(seq) {
+        return seq.toUpperCase().split('').filter(c => 'AGCTRYSWKMBDHVN'.includes(c)).join('')
     }
+    function add_rc_patterns(patterns) {
+        return patterns.concat(patterns.filter(p => p.seq != rev_comp(p.seq)).map(p => new Pattern(p.name, rev_comp(p.seq)))).sort((p1, p2) => p1.name.localeCompare(p2.name))
+    }
+    let patterns = []
+    if (document.querySelector('#custom-seq-radio').checked) {
+        patterns = document.querySelector('#custom-seq')
+            .value.split('\n').filter(l => l != '').map(s => s.split(':'))
+            .map(np => np.length == 2 ? new Pattern(np[0], filter_seq(np[1])) : new Pattern(filter_seq(np[0]), filter_seq(np[0])))
+        if (document.querySelector('#seqs-bottom-strand').checked)
+            patterns = add_rc_patterns(patterns)
+    } else {
+        patterns = Array.from(document.querySelectorAll('#restriction-enzymes input:checked')).map(el => new Pattern(el.id, restriction_enzymes[el.id]))
+        patterns = add_rc_patterns(patterns)
+    }
+    return patterns
+}
+
+function highlight_site_insert(seq, fit) {
+    return seq.substring(0, fit.pos) +
+        '<span class="highlight highlight-insert">' +
+        fit.new_seq +
+        '</span>' +
+        seq.substring(fit.end)
+}
+
+function highlight_site_remove(seq, record) {
+    return record.seq.substring(0, record.code_left) +
+        '<span class="highlight highlight-remove-outer">' +
+        record.seq.substring(record.code_left, record.efit.start) +
+        '<span class="highlight highlight-remove">' +
+        record.seq.substring(record.efit.start, record.efit.end) +
+        '</span>' +
+        record.seq.substring(record.efit.end, record.code_right) +
+        '</span>' +
+        record.seq.substring(record.code_right)
+}
+
+function result_tr(fit, highlighted) {
+    let tr = document.createElement('tr')
+    tr.innerHTML = 
+        `<td><span class="action-link" onclick="scroll_to_match(this)" title="${fit.pattern.seq}">${fit.pattern.name}</span></td>` +
+        `<td>${highlighted}</td>`
+    return tr
+}
+function add_status_string(str) {
+    let status = document.createElement('div')
+    status.classList.add('status-string')
+    status.innerHTML = `<td colspan="2">${str}</td>`
+    document.getElementById('results').appendChild(status)
+}
+
+function run_insert(seq, patterns, code) {
+    let fits = try_insert_patterns(seq, patterns, code)
+    fits.sort((f1, f2) => ((f1.pos - f2.pos) == 0) ? (f1.pattern.name.localeCompare(f2.pattern.name)) : (f1.pos - f2.pos))
+    fits.map(fit => result_tr(fit, highlight_site_insert(seq, fit))).forEach(tr => document.querySelector('table').appendChild(tr))
+    if (fits.length == 0) {
+        add_status_string('<span style="color: red;">Nothing found :(</span>')
+    }
+}
+
+function run_remove(seq, patterns, code) {
+    let history = try_remove_patterns(seq, patterns, code, +document.querySelector('#n-replacements').value, code)
+    history.map(record => result_tr(record.efit, highlight_site_remove(seq, record))).forEach(tr => document.querySelector('table').appendChild(tr))
+    if (history.length > 0 && history[history.length - 1].success == true)
+        add_status_string(`<span style="color: green;">Succesfully removed ${history.length} sequence(s)</span>`)
+    else if(history.length == 0)
+        add_status_string(`<span style="color: green;">Nothing to remove</span>`)
+    else
+        add_status_string(`<span style="color: red;">Unable to remove "${history[history.length - 1].efit.pattern.name}"</span>`)
+}
+function get_code() {
+    const selected_code = document.querySelector('#gen-code').options[document.querySelector('#gen-code').selectedIndex]
+    return new GeneticCode(transl_tables[selected_code.dataset.translTable], codon_freqs.filter(tax => tax.taxid == selected_code.dataset.taxid)[0].freqs)
+}
+
+function calculate() {
+    const code = get_code()
+    let cds = get_input_cds(code)
+    let patterns = get_input_patterns()
     
     let results_table = document.getElementById('results')
     results_table.innerHTML = ''
-    if (cds == '' || Object.keys(patterns).length == 0)
+    if (cds == '')
         return
-    results_table.appendChild(table_header(cds))
-
-    let found_seqs = []
-    for (const pattern_name of Object.keys(patterns)) {
-        fits = try_insert_pattern(cds, patterns[pattern_name], add_rev_comp)    
-        if (fits.length > 0 && !found_seqs.includes(patterns[pattern_name])) {
-            //add finds to table
-            fits.map(fit => result_tr(cds, pattern_name, fit)).forEach(tr => document.querySelector('table').appendChild(tr));
-            found_seqs.push(patterns[pattern_name])
-        }
-    }
-    if (found_seqs.length == 0) {
-        results_table.innerHTML += '<p style="color: red; position: sticky; left: 0;">Nothing found :(</p>'
-    }
+    results_table.appendChild(table_header(cds, code.translate(cds)))
+    if (patterns.length == 0)
+        return
+    if (document.querySelector('input[name=mode]:checked').id == 'mode-insert')
+        run_insert(cds, patterns, code)
+    else
+        run_remove(cds, patterns, code)
     results_table.scrollLeft = 0
     results_table.scrollTop = 0
 }
 
 function rev_comp_input() {
-    document.getElementById('in-seq').value = rev_comp(get_input_cds())
+    document.getElementById('in-seq').value = rev_comp(get_input_cds(get_code()))
 }
 
 let table = document.getElementById('restriction-enzymes')
@@ -124,13 +184,41 @@ function scroll_to_match(el) {
     let highlight = el.parentNode.parentNode.querySelector('.highlight')
     document.getElementById('results').scrollLeft = highlight.offsetLeft
 }
-function select_subset(el) {
-    subsets[el.dataset.subset].forEach(
-        name => document.querySelector('#restriction-enzymes #' + name).checked = true
-    )
+
+function get_selected_set() {
+    const select = document.querySelector('select[name=re-set]')
+    let set = select.options[select.selectedIndex].id
+    if (set == 'selected-res') {
+        return Array.from(document.querySelectorAll('#restriction-enzymes input:checked')).map(el => el.id)
+    } else {
+        return subsets[set]
+    }
 }
-function deselect_subset(el) {
-    subsets[el.dataset.subset].forEach(name => document.querySelector('#restriction-enzymes #' + name).checked = false)
+function show_re_set() {
+    document.querySelectorAll('#restriction-enzymes tr').forEach(el => el.hidden = true)
+    get_selected_set().forEach(name => document.getElementById(name).parentElement.parentElement.hidden = false)
+    function filter_by(input, key) {
+        const filter = new RegExp(input.value, 'i')
+        document.querySelectorAll('#restriction-enzymes input').forEach(el => {
+            if (!key(el).match(filter)) {
+                el.parentElement.parentElement.hidden = true
+            }
+        })
+    }
+    filter_by(document.querySelector('#name-filter'), el => el.id)
+    filter_by(document.querySelector('#seq-filter'), el => restriction_enzymes[el.id])
+}
+function select_shown_res(checked) {
+    get_selected_set().forEach(name => document.getElementById(name).checked = checked)
+}
+function clear_re_set() {
+    document.querySelectorAll('#restriction-enzymes input:checked').forEach(el => el.checked = false)
+}
+function reset_filters() {
+    document.querySelectorAll('#name-filter, #seq-filter').forEach(el => {
+        el.value = ''
+        el.dispatchEvent(new Event('input'))
+    })
 }
 
 let crosshair = document.getElementById('crosshair')
@@ -143,8 +231,8 @@ let dragging = false
 document.querySelectorAll('body, textarea').forEach(el => {
     el.addEventListener('keypress', e => {
         if (e.key == 'Enter' && !e.shiftKey) {
-            calculate()
             e.preventDefault()
+            calculate()
         }
     })
 })
@@ -152,6 +240,12 @@ document.getElementById('restriction-enzymes').addEventListener('click', e => {
     if (e.button != 0) return;
     document.getElementById('re-radio').checked = true
 })
+document.querySelectorAll('.re-box, #restriction-enzymes').forEach(
+    el => el.addEventListener('click', e => {
+        if (e.button != 0) return;
+        document.getElementById('re-radio').checked = true
+    })
+)
 document.getElementById('results').addEventListener('mousemove', function (e) {
     if (dragging) {
         let left = Math.min(e.clientX, drag_start)

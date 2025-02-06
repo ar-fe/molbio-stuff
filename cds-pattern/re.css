@@ -1,4 +1,8 @@
-﻿body {
+﻿:root {
+    --gaps: 0.5em;
+}
+
+body {
     margin: 0;
     box-sizing: content-box;
     display: flex;
@@ -9,21 +13,20 @@
 #wrapper {
     width: 100%;
     height: 100vh;
-}
-#wrapper-pad {
-    padding: 4%;
+    padding: 2.5% 5%;
+    box-sizing: border-box;
     display: flex;
-    flex-direction: column;
-    gap: 1.5em
+    flex-direction: row;
+    gap: calc(2 * var(--gaps));
 }
+
 #calculate-wrapper {
-    flex-grow: 1;
     display: flex;
     flex-direction: column;
     align-items: center;
 }
 #calculate {
-    height: 6vh;
+    height: 2.5em;
     font-size: 14pt;
     width: 80%;
 }
@@ -31,9 +34,8 @@ textarea {
     font-size: 14pt;
 }
 #in-seq {
-    resize: none;
-    height: 100%;
-    flex-grow: 10;
+    resize: vertical;
+    min-height: 6em;
     font-size: 12pt;
 } 
 div {
@@ -45,26 +47,70 @@ div {
     display: flex;
     align-items: center;
 }
-.prompt {
-    max-width: 12.5em;
-}
 .rev-comp-link {
     display: none;
 }
 input#in-cds-radio:checked ~ .rev-comp-link {
     display: inline;
 }
-.body {
-    flex-direction: row;
-    display: flex;
-    gap: 1em;
-}
-.body-right {
-    width: 20%;
-    height: 70vh;
+.body-left {
+    inline-size: 0;
+    flex: 1 0 0;
     display: flex;
     flex-direction: column;
-    gap: 0.5em;
+    gap: var(--gaps);
+}
+.body-right {
+    inline-size: 0;
+    flex: 0 0 22%;
+    display: flex;
+    flex-direction: column;
+    gap: var(--gaps);
+    overflow: hidden;
+}
+.mode-select {
+    display: flex;
+    justify-content: center;
+    line-height: 1.2;
+    gap: 0.2em;
+}
+.mode-select label {
+    border-radius: 0.2em;
+    padding: 0.1em;
+}
+.insert {
+    display: none;
+}
+.remove {
+    display: none;
+}
+#wrapper:has(#mode-insert:checked) .insert {
+    display: initial;
+}
+#wrapper:has(#mode-remove:checked) .remove {
+    display: initial;
+}
+button.insert {
+    background-color: #cec;
+    border-color: #7c7;
+}
+button.insert:hover {
+    background-color: #ada;
+    border-color: #5a5;
+}
+button.insert:active {
+    background-color: #d8f8d8;
+}
+button.remove {
+    background-color: #fbb;
+    border-color: #d88;
+}
+button.remove:hover {
+    background-color: #eaa;
+    border-color: #b66;
+}
+button.remove:active {
+    background-color: #fdd;
 }
 #custom-seq {
     resize: vertical;
@@ -72,17 +118,39 @@ input#in-cds-radio:checked ~ .rev-comp-link {
     width: 100%;
     min-height: 5.5ex;
 }
+.re-box {
+    display: flex;
+    flex-direction: column;
+    gap: 0.1em;
+}
+select[name=re-set] {
+    width: 100%;
+    font-size: 12pt;
+}
+select[name=re-set] option {
+    padding: 0.1em 0.4em;
+}
 span.highlight {
-    background-color: greenyellow;
+    border-radius: 0.2em;
+}
+span.highlight-insert {
+    background-color: lightgreen;
+}
+span.highlight-remove-outer {
+    /* background-color: #ffd8d8; */
+    outline: 1px solid #ffaaaa;
+}
+span.highlight-remove {
+    background-color: #ffaaaa;
 }
 table#results {
     display: block;
     overflow: scroll;
-    height: 70vh;
+    flex: 1 0 0;
     font-family: monospace;
     font-size: 12pt;
     white-space: pre;
-    width: 80%;
+    width: 100%;
     border-collapse: collapse;
 }
 table#results > tr:first-child {
@@ -94,7 +162,7 @@ table#results > tr:first-child > th:first-child {
     left: 0;
 }
 table#results > tr:first-child > th {
-    padding-bottom: 5px;
+    padding-bottom: 0.2em;
 }
 #results th {
     top: 0;
@@ -107,9 +175,11 @@ tr > td:first-child {
     position: sticky;
     background-color: white;
     z-index: 2;
+    white-space: nowrap;
+}
+tr > td:first-child, tr > th:first-child {
     padding-left: 0.5em;
     padding-right: 0.5em;
-    white-space: nowrap;
 }
 tr:not(:first-child) {
     box-sizing: border-box;
@@ -119,8 +189,21 @@ tr:not(:first-child) {
 #results tr > td:first-child {
     font-weight: bold;
 }
-#restriction-enzymes {
+.status-string {
+    padding-left: 0.5em;
+    position: sticky;
+    left: 0;
+    font-weight: bold;
+}
+.re-list-wrapper {
+    display: flex;
+    flex-direction: column;
+    height: 0;
     flex: 1;
+}
+.re-list-wrapper input[type=text] {
+    width: 0;
+    font-size: 100%;
 }
 #restriction-enzymes td {
     padding-left: 0;
@@ -142,8 +225,38 @@ label {
 .noselect {
     user-select: none;
 }
+table, textarea, select, button, input[type=text], input[type=number] {
+    border: 1px solid lightgray;
+    border-radius: 5px;
+}
+input[type=text], input[type=number] {
+    border-radius: 2.5px;
+}
+input[type=number] {
+    font-size: 100%;
+    width: 4ch;
+}
+select:focus, textarea:focus, input[type=text]:focus, input[type=number]:focus {
+    outline: none;
+    border-color: gray;
+}
+textarea {
+    padding: 0 0.25em;
+}
 button {
+    background-color: #eee;
     user-select: none;
+}
+button:hover {
+    border-color: gray;
+    background-color: #ddd;
+}
+button:active {
+    background-color: #eee;
+}
+select {
+    font-family: inherit;
+    font-size: 100%;
 }
 .action-link {
     color: dodgerblue;
