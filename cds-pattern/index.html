@@ -11,7 +11,7 @@
             <div class="prompt noselect">Enter <input type="radio" id="in-prot-radio" name="input-type"><label for="in-prot-radio">protein (single-letter code)</label> or
                 <input type="radio" id="in-cds-radio" name="input-type" checked><label for="in-cds-radio">coding sequence</label><span class="rev-comp-link"> (<span class="action-link" onclick="rev_comp_input()">reverse complement the input</span>,
                 <input type="checkbox" name="codon-optimize" id="codon-optimize"><label for="codon-optimize">codon optimize</label>)</span>:</div>
-            <textarea id="in-seq" placeholder="Original sequence. Press Enter to process, Shift-Enter to add a new line"></textarea>
+            <textarea id="in-seq" placeholder="Original sequence. Press Ctrl-Enter to process"></textarea>
             <div>
                 Use the
                 <select id="gen-code">
@@ -35,19 +35,19 @@
                 <button id="calculate" class="remove" onclick="calculate()">Remove sequences</button>
             </div>
             <div class="noselect insert">Try to insert:</div>
-            <div class="remove">Replace at least <input type="number" min="1" value="1" id="n-replacements"> nts</div>
+            <div class="noselect remove">Replace at least <input type="number" min="1" value="1" id="n-replacements"> nts</div>
             <div class="noselect remove">Try to remove:</div>
             <div class="noselect">
-                <input type="radio" name="re-or-seq" id="custom-seq-radio"><label for="custom-seq-radio">Your sequences:</label>
-                <textarea id="custom-seq" placeholder="GGTCTC&#013;EcoO109I: RGGNCCY etc." onclick="document.getElementById('custom-seq-radio').checked = true"></textarea>
+                <input type="checkbox" id="custom-seq-checkbox"><label for="custom-seq-checkbox">Your sequences:</label>
+                <textarea id="custom-seq" placeholder="GGTCTC&#013;EcoO109I: RGGNCCY etc." onclick="document.getElementById('custom-seq-checkbox').checked = true"></textarea>
                 <input type="checkbox" id="seqs-bottom-strand"><label for="seqs-bottom-strand">Search in bottom strand too</label>
             </div>
             <div class="re-box noselect">
-                <div><input type="radio" name="re-or-seq" id="re-radio" checked><label for="re-radio">Restriction enzyme sites:</label></div>
-                <div style="font-size: 12pt;">Enzyme sets
+                <div id="re-checkbox-wrapper"><input type="checkbox" id="re-checkbox" checked><label for="re-checkbox">Restriction enzyme sites:</label></div>
+                <div class="re-select" style="font-size: 12pt;">Enzyme sets
                 (<span onclick="select_shown_res(true)" class="action-link">add</span>/<span onclick="select_shown_res(false)" class="action-link">remove</span> all shown,
                 <span onclick="clear_re_set()" class="action-link">clear all</span>):</div>
-                <select name="re-set" oninput="show_re_set()" onclick="show_re_set()" size="5">
+                <select name="re-set" class="re-select" oninput="show_re_set()" onclick="show_re_set()" size="5">
                     <option id="selected-res" selected>Selected</option>
                     <option id="all" selected>All enzymes</option>
                     <option id="6-plus">6+ sites</option>
@@ -62,7 +62,7 @@
                     <option id="SibEnzyme-Turbo">SibEnzyme Turbo</option>
                 </select>
             </div>
-            <div class="re-list-wrapper">
+            <div class="re-list-wrapper re-select">
                 <div style="display: flex; gap: 0.2em; align-items: baseline; padding-bottom: 0.2em;">
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 50 50" style="width: 1.2em; fill: gray; align-self: center">
                         <path d="M 21 3 C 11.601563 3 4 10.601563 4 20 C 4 29.398438 11.601563 37 21 37 C 24.355469 37 27.460938 36.015625 30.09375 34.34375 L 42.375 46.625 L 46.625 42.375 L 34.5 30.28125 C 36.679688 27.421875 38 23.878906 38 20 C 38 10.601563 30.398438 3 21 3 Z M 21 7 C 28.199219 7 34 12.800781 34 20 C 34 27.199219 28.199219 33 21 33 C 13.800781 33 8 27.199219 8 20 C 8 12.800781 13.800781 7 21 7 Z"></path>

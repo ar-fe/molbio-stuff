@@ -77,18 +77,19 @@ function get_input_patterns() {
     function add_rc_patterns(patterns) {
         return patterns.concat(patterns.filter(p => p.seq != rev_comp(p.seq)).map(p => new Pattern(p.name, rev_comp(p.seq)))).sort((p1, p2) => p1.name.localeCompare(p2.name))
     }
-    let patterns = []
-    if (document.querySelector('#custom-seq-radio').checked) {
-        patterns = document.querySelector('#custom-seq')
+    let patterns_custom = [], patterns_re = []
+    if (document.querySelector('#custom-seq-checkbox').checked) {
+        patterns_custom = document.querySelector('#custom-seq')
             .value.split('\n').filter(l => l != '').map(s => s.split(':'))
             .map(np => np.length == 2 ? new Pattern(np[0], filter_seq(np[1])) : new Pattern(filter_seq(np[0]), filter_seq(np[0])))
         if (document.querySelector('#seqs-bottom-strand').checked)
-            patterns = add_rc_patterns(patterns)
-    } else {
-        patterns = Array.from(document.querySelectorAll('#restriction-enzymes input:checked')).map(el => new Pattern(el.id, restriction_enzymes[el.id]))
-        patterns = add_rc_patterns(patterns)
+            patterns_custom = add_rc_patterns(patterns_custom)
     }
-    return patterns
+    if (document.querySelector('#re-checkbox').checked) {
+        patterns_re = Array.from(document.querySelectorAll('#restriction-enzymes input:checked')).map(el => new Pattern(el.id, restriction_enzymes[el.id]))
+        patterns_re = add_rc_patterns(patterns_re)
+    }
+    return [...patterns_re, ...patterns_custom]
 }
 
 function highlight_site_insert(seq, fit) {
@@ -137,12 +138,22 @@ function run_insert(seq, patterns, code) {
 function run_remove(seq, patterns, code) {
     let history = try_remove_patterns(seq, patterns, code, +document.querySelector('#n-replacements').value, code)
     history.map(record => result_tr(record.efit, highlight_site_remove(seq, record))).forEach(tr => document.querySelector('table').appendChild(tr))
-    if (history.length > 0 && history[history.length - 1].success == true)
+    let last = history[history.length - 1]
+    if (history.length > 0 && last.success == true)
         add_status_string(`<span style="color: green;">Succesfully removed ${history.length} sequence(s)</span>`)
     else if(history.length == 0)
         add_status_string(`<span style="color: green;">Nothing to remove</span>`)
-    else
-        add_status_string(`<span style="color: red;">Unable to remove "${history[history.length - 1].efit.pattern.name}"</span>`)
+    else {
+        let len = Array.from(last.collisions).length
+        if (len === 1 && last.collisions.has(last.efit.pattern.name))
+            add_status_string(`<span style="color: red;">Unable to remove "${last.efit.pattern.name}"</span>`)
+        else {
+            last.collisions.delete(last.efit.pattern.name)
+            let extra_collisions = Array.from(last.collisions)
+            add_status_string(`<span style="color: red;">Unable to remove "${last.efit.pattern.name}"` + 
+                ` (collision(s) with ${extra_collisions.join(', ')})</span>`)
+        }
+    }
 }
 function get_code() {
     const selected_code = document.querySelector('#gen-code').options[document.querySelector('#gen-code').selectedIndex]
@@ -230,20 +241,20 @@ let dragging = false
 
 document.querySelectorAll('body, textarea').forEach(el => {
     el.addEventListener('keypress', e => {
-        if (e.key == 'Enter' && !e.shiftKey) {
+        if (e.code == 'Enter' && e.ctrlKey) {
             e.preventDefault()
             calculate()
         }
     })
 })
-document.getElementById('restriction-enzymes').addEventListener('click', e => {
-    if (e.button != 0) return;
-    document.getElementById('re-radio').checked = true
-})
-document.querySelectorAll('.re-box, #restriction-enzymes').forEach(
+// document.querySelector('.re-select').addEventListener('click', e => {
+//     if (e.button != 0) return;
+//     document.getElementById('re-checkbox').checked = true
+// })
+document.querySelectorAll('.re-select').forEach(
     el => el.addEventListener('click', e => {
         if (e.button != 0) return;
-        document.getElementById('re-radio').checked = true
+        document.getElementById('re-checkbox').checked = true
     })
 )
 document.getElementById('results').addEventListener('mousemove', function (e) {

@@ -60,120 +60,6 @@ function rev_comp(seq) {
     return seq.split('').reverse().map(c => comp[c]).join('')
 }
 
-// const fwd_code = {
-//     'TTT':   'F',  'TAT':   'Y',  'TCT':   'S',  'TGT':   'C',  'ATT':   'I',  'AAT':   'N',  'ACT':   'T',  'AGT':   'S',
-//     'TTC':   'F',  'TAC':   'Y',  'TCC':   'S',  'TGC':   'C',  'ATC':   'I',  'AAC':   'N',  'ACC':   'T',  'AGC':   'S',
-//     'TTA':   'L',  'TAA':   '*',  'TCA':   'S',  'TGA':   '*',  'ATA':   'I',  'AAA':   'K',  'ACA':   'T',  'AGA':   'R',
-//     'TTG':   'L',  'TAG':   '*',  'TCG':   'S',  'TGG':   'W',  'ATG':   'M',  'AAG':   'K',  'ACG':   'T',  'AGG':   'R',
-//     'CTT':   'L',  'CAT':   'H',  'CCT':   'P',  'CGT':   'R',  'GTT':   'V',  'GAT':   'D',  'GCT':   'A',  'GGT':   'G',
-//     'CTC':   'L',  'CAC':   'H',  'CCC':   'P',  'CGC':   'R',  'GTC':   'V',  'GAC':   'D',  'GCC':   'A',  'GGC':   'G',
-//     'CTA':   'L',  'CAA':   'Q',  'CCA':   'P',  'CGA':   'R',  'GTA':   'V',  'GAA':   'E',  'GCA':   'A',  'GGA':   'G',
-//     'CTG':   'L',  'CAG':   'Q',  'CCG':   'P',  'CGG':   'R',  'GTG':   'V',  'GAG':   'E',  'GCG':   'A',  'GGG':   'G',
-// }
-
-// function translate(seq) {
-//     return (seq.match(/.{3}/g) || []).map(codon => fwd_code[codon]).join('')
-// }
-
-const human_freqs = {
-    'TTT': 1385301,
-    'TTC': 1413268,
-    'TTA': 703680,
-    'TTG': 1086777,
-    'CTT': 1138433,
-    'CTC': 1439345,
-    'CTA': 601662,
-    'CTG': 2918400,
-    'ATT': 1331901,
-    'ATC': 1508988,
-    'ATA': 652939,
-    'ATG': 1739992,
-    'GTT': 949137,
-    'GTC': 1086717,
-    'GTA': 618960,
-    'GTG': 2090923,
-    'TAT': 978774,
-    'TAC': 1090514,
-    'TAA': 35218,
-    'TAG': 28499,
-    'CAT': 956479,
-    'CAC': 1184041,
-    'CAA': 1136523,
-    'CAG': 2872161,
-    'AAT': 1489775,
-    'AAC': 1478832,
-    'AAA': 2221062,
-    'AAG': 2567940,
-    'GAT': 1942185,
-    'GAC': 1961667,
-    'GAA': 2719693,
-    'GAG': 3206546,
-    'TCT': 1368632,
-    'TCC': 1399962,
-    'TCA': 1142684,
-    'TCG': 325925,
-    'CCT': 1560898,
-    'CCC': 1544626,
-    'CCA': 1529004,
-    'CCG': 503096,
-    'ACT': 1152700,
-    'ACC': 1442511,
-    'ACA': 1335468,
-    'ACG': 452037,
-    'GCT': 1534685,
-    'GCC': 2088762,
-    'GCA': 1377145,
-    'GCG': 477758,
-    'TGT': 841042,
-    'TGC': 873765,
-    'TGA': 63801,
-    'TGG': 937286,
-    'CGT': 367659,
-    'CGC': 704401,
-    'CGA': 518818,
-    'CGG': 871786,
-    'AGT': 1135376,
-    'AGC': 1591829,
-    'AGA': 1073213,
-    'AGG': 980476,
-    'GGT': 875715,
-    'GGC': 1599325,
-    'GGA': 1384137,
-    'GGG': 1240793,
-}
-
-
-// function code_to_rev(code, freqs) {
-//     let rev_code = Object.fromEntries(Array.from(new Set(Object.values(code))).map(aa => [aa, Object.keys(code).filter(codon => code[codon] == aa)]))
-//     if (freqs !== undefined) {
-//         Object.values(rev_code).forEach(codons => codons.sort((c1, c2) => freqs[c2] - freqs[c1]))
-//     }
-//     return rev_code
-// }
-
-// const rev_code = {
-//     '*': ['TGA', 'TAA', 'TAG'], 'A': ['GCC', 'GCT', 'GCA', 'GCG'], 'M': ['ATG'], 'G': ['GGC', 'GGA', 'GGG', 'GGT'], 'S': ['AGC', 'TCC', 'TCT', 'TCA', 'AGT', 'TCG'],
-//     'C': ['TGC', 'TGT'], 'N': ['AAT', 'AAC'], 'H': ['CAC', 'CAT'], 'T': ['ACC', 'ACA', 'ACT', 'ACG'], 'D': ['GAC', 'GAT'], 'P': ['CCT', 'CCC', 'CCA', 'CCG'],
-//     'I': ['ATC', 'ATT', 'ATA'], 'V': ['GTG', 'GTC', 'GTT', 'GTA'], 'E': ['GAG', 'GAA'], 'Q': ['CAG', 'CAA'], 'K': ['AAG', 'AAA'], 'W': ['TGG'], 'F': ['TTC', 'TTT'],
-//     'R': ['AGA', 'AGG', 'CGG', 'CGC', 'CGA', 'CGT'], 'L': ['CTG', 'CTC', 'CTT', 'TTG', 'TTA', 'CTA'], 'Y': ['TAC', 'TAT']   		
-// }
-
-// function back_translate(seq) {
-//     return seq.split('').map(aa => rev_code[aa][0]).join('')
-// }
-
-// function prot_to_deg(seq) {
-//     const rev_code_deg = {
-//         '*': 'TRR',
-//         'A': 'GCN', 'M': 'ATG', 'G': 'GGN', 'S': 'WSN',
-//         'C': 'TGY', 'N': 'AAY', 'H': 'CAY', 'T': 'ACN',
-//         'D': 'GAY', 'P': 'CCN', 'I': 'ATH', 'V': 'GTN',
-//         'E': 'GAR', 'Q': 'CAR', 'K': 'AAR', 'W': 'TGG',
-//         'F': 'TTY', 'R': 'MGN', 'L': 'YTN', 'Y': 'TAY',
-//     }
-//     return seq.split('').map(a => rev_code_deg[a]).join('')
-// }
-
 function pattern_to_prematch_re(pattern) {
     const prematch_patterns = {
         'A': '[ARWMDHVN]', 'G': '[GRSKBDVN]', 'C': '[CYSMBHVN]', 'T': '[TYWKBDHN]',
@@ -207,7 +93,7 @@ function try_fit_prematch(prematch, seq, code) {
     loop: for (let i = 0; i < codons.length; i++) {
         const m_c = m_codons[i]
         const c = codons[i]
-        if (c == m_c) {
+        if (c === m_c) {
             result_codons.push(c)
             continue
         }
@@ -236,7 +122,7 @@ function try_insert_pattern(seq, deg_seq, pattern, code) {
         const start = m.index - m.index % 3
         const end = m.index + pattern_seq.length + 1 + (3 - (m.index - start)) 
         const subseq = seq.slice(start, end)
-        const prematch = subseq.substring(0, m.index - start) + pattern_seq + subseq.substring(m.index - start + pattern_seq.length)
+        const prematch = 'N'.repeat(m.index - start) + pattern_seq + 'N'.repeat(end - start - pattern_seq.length)
         let fit = try_fit_prematch(prematch, subseq, code)
         if (fit)
             fits.push(new Fit(pattern, m.index, fit.substring(m.index - start, m.index - start + pattern_seq.length), !!subseq.match(iupac_re(pattern_seq))))
@@ -262,22 +148,6 @@ function try_insert_patterns(seq, patterns, code) {
 
 
 
-function bin_search_fit_end(fits, value) {
-    function bin_search(start, stop) {
-        if (stop - start == 1) {
-            if (fits[start].end <= value)
-                return stop
-            return start
-        }
-        let pivot = start + Math.floor((stop - start) / 2)
-        if (fits[pivot].end <= value)
-            return bin_search(pivot, stop)
-        else
-            return bin_search(0, pivot)
-    }
-    return bin_search(0, fits.length)
-}
-
 function try_replace_codons(seq, patterns_re, pattern, code, n_mismatches=1) {
     function num_mismatches(seq, pattern) {        
         const nuc_mismatches = {
@@ -292,8 +162,8 @@ function try_replace_codons(seq, patterns_re, pattern, code, n_mismatches=1) {
     }
     let ncodons = seq.length / 3
     let replacements = [{seqs: [seq], replaced: []}]
+    let all_colliding_names = new Set()
     while (replacements.length > 0) {
-        console.log(replacements)
         let new_replacements = []
         for (const replacement of replacements) {
             const seqs = replacement.seqs
@@ -303,18 +173,21 @@ function try_replace_codons(seq, patterns_re, pattern, code, n_mismatches=1) {
                 id_start = replaced[replaced.length - 1] + 1
             if (id_start >= ncodons)
                 continue
-            for (seq of seqs) {
+            for (s of seqs) {
                 for (let i = id_start; i < ncodons; i++) {
                     let new_seqs = []
-                    const codon = seq.slice(i * 3, i * 3 + 3)
+                    const codon = s.slice(i * 3, i * 3 + 3)
                     let aa = code.code[codon]
                     for (new_codon of code.codons(aa)) {
                         if (new_codon == codon)
                             continue
-                        let new_seq = seq.slice(0, i * 3) + new_codon + seq.slice(i * 3 + 3)
-                        if (!new_seq.match(patterns_re))
+                        let new_seq = s.slice(0, i * 3) + new_codon + s.slice(i * 3 + 3)                        
+                        let matches = patterns_re.filter(p => new_seq.match(p.pattern))
+                        if (matches.length == 0)
                             if (n_mismatches == 1 || num_mismatches(new_seq, pattern) >= n_mismatches)
-                                return new_seq;
+                                return {seq: new_seq, colliding_names: null};
+                        let colliding_names = new Set(matches.map(c => c.name))
+                        all_colliding_names = all_colliding_names.union(colliding_names)
                         new_seqs.push(new_seq)
                     }
                     if (new_seqs.length > 0)
@@ -324,7 +197,7 @@ function try_replace_codons(seq, patterns_re, pattern, code, n_mismatches=1) {
         }
         replacements = new_replacements
     }
-    return null
+    return {seq: null, colliding_names: all_colliding_names}
 }
 
 function collision_patterns_re(collisions, code_left, code_right) {
@@ -333,21 +206,21 @@ function collision_patterns_re(collisions, code_left, code_right) {
         return '.'.repeat(fit.start - code_left) + iupac_re(fit.pattern.seq) + '.'.repeat(code_right - (fit.end))
     }
     for (fit of collisions)
-        res.add(block_pattern(fit))
-    return Array.from(res).join('|')
+        res.add({pattern: block_pattern(fit), name: fit.pattern.name})
+    return Array.from(res)
 }
 
 function try_remove_patterns(seq, patterns, code, n_mismatches=1) {
-    const fits = try_insert_patterns(seq, patterns, code)
-    const fits_bystart = fits.slice().sort((f1, f2) => f1.start - f2.start)
-    const fits_byend = fits.slice().sort((f1, f2) => f1.end - f2.end)
+    const fits = try_insert_patterns(seq, patterns, code).slice().sort((f1, f2) => f1.start - f2.start)
     function find_colliding_fits(efit) {
-        const ends_left  = bin_search_fit_end(fits_byend, efit.start),
-              ends_right = bin_search_fit_end(fits_byend, efit.end)
-        return Array.from(new Set(fits_byend.slice(ends_left, ends_right)))
+        const coll = fits.filter(f => ((f.start >= efit.start) && (f.start < efit.end)) ||
+                                      ((f.end >= efit.start)   && (f.end < efit.end)) ||
+                                      ((efit.start >= f.start) && (efit.start < f.end)) ||
+                                      ((efit.end >= f.start)   && (efit.end < f.end)))
+        return Array.from(new Set(coll))
     }
 
-    const exact_fits = fits_bystart.filter(f => f.exact)
+    const exact_fits = fits.filter(f => f.exact)
     let history = []
     for (efit of exact_fits) {
         // if the sequence is already destroyed
@@ -362,11 +235,18 @@ function try_remove_patterns(seq, patterns, code, n_mismatches=1) {
         const patterns_re = collision_patterns_re(collisions, code_left, code_right)
         const pattern = 'N'.repeat(efit.start - code_left) + efit.pattern.seq + 'N'.repeat(code_right - efit.end)
         
-        let new_seq = try_replace_codons(seq.slice(code_left, code_right), patterns_re, pattern, code, n_mismatches)
-
+        let new_replacement = try_replace_codons(seq.slice(code_left, code_right), patterns_re, pattern, code, n_mismatches)
+        let new_seq = new_replacement.seq
         if(new_seq !== null)
             seq = seq.slice(0, code_left) + new_seq + seq.slice(code_right)
-        let record = {seq: seq, efit: efit, success: true, code_left: code_left, code_right: code_right} //, __dbg_p: patterns_re}
+        let record = {
+            seq: seq,
+            efit: efit,
+            success: true,
+            code_left: code_left,
+            code_right: code_right,
+            collisions: new_replacement.colliding_names
+        }
         if (new_seq === null)
             record.success = false
         history.push(record)
