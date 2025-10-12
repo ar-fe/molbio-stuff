@@ -164,37 +164,68 @@ function try_replace_codons(seq, patterns_re, pattern, code, n_mismatches=1) {
     let replacements = [{seqs: [seq], replaced: []}]
     let all_colliding_names = new Set()
     while (replacements.length > 0) {
+        console.log(JSON.stringify(replacements))
         let new_replacements = []
         for (const replacement of replacements) {
             const seqs = replacement.seqs
             const replaced = replacement.replaced
+            // pick exactly one index to change: try each possible next codon index (one per new branch)
             let id_start = 0
             if (replaced.length > 0)
                 id_start = replaced[replaced.length - 1] + 1
             if (id_start >= ncodons)
                 continue
-            for (s of seqs) {
-                for (let i = id_start; i < ncodons; i++) {
+            for (let i = id_start; i < ncodons; i++) {
+                for (let s of seqs) {
                     let new_seqs = []
                     const codon = s.slice(i * 3, i * 3 + 3)
                     let aa = code.code[codon]
-                    for (new_codon of code.codons(aa)) {
+                    for (let new_codon of code.codons(aa)) {
                         if (new_codon == codon)
                             continue
-                        let new_seq = s.slice(0, i * 3) + new_codon + s.slice(i * 3 + 3)                        
+                        let new_seq = s.slice(0, i * 3) + new_codon + s.slice(i * 3 + 3)
                         let matches = patterns_re.filter(p => new_seq.match(p.pattern))
-                        if (matches.length == 0)
+                        if (matches.length == 0) {
                             if (n_mismatches == 1 || num_mismatches(new_seq, pattern) >= n_mismatches)
                                 return {seq: new_seq, colliding_names: null};
+                        }
                         let colliding_names = new Set(matches.map(c => c.name))
-                        all_colliding_names = all_colliding_names.union(colliding_names)
+                        for (const n of colliding_names) all_colliding_names.add(n)
                         new_seqs.push(new_seq)
                     }
-                    if (new_seqs.length > 0)
+                    if (new_seqs.length > 0) {
                         new_replacements.push({seqs: new_seqs, replaced: [...replaced, i]})
+                    }
                 }
             }
-        }
+            // let id_start = 0
+            // if (replaced.length > 0)
+            //     id_start = replaced[replaced.length - 1] + 1
+            // if (id_start >= ncodons)
+            //     continue
+            // for (s of seqs) {
+            //     for (let i = id_start; i < ncodons; i++) {
+            //         let new_seqs = []
+            //         const codon = s.slice(i * 3, i * 3 + 3)
+            //         let aa = code.code[codon]
+            //         for (new_codon of code.codons(aa)) {
+            //             if (new_codon == codon)
+            //                 continue
+            //             let new_seq = s.slice(0, i * 3) + new_codon + s.slice(i * 3 + 3)                        
+            //             let matches = patterns_re.filter(p => new_seq.match(p.pattern))
+            //             if (matches.length == 0)
+            //                 if (n_mismatches == 1 || num_mismatches(new_seq, pattern) >= n_mismatches)
+            //                     return {seq: new_seq, colliding_names: null};
+            //             let colliding_names = new Set(matches.map(c => c.name))
+            //             all_colliding_names = all_colliding_names.union(colliding_names)
+            //             new_seqs.push(new_seq)
+            //         }
+            //         if (new_seqs.length > 0)
+            //             console.log(JSON.stringify([...replaced, i]))
+            //             new_replacements.push({seqs: new_seqs, replaced: [...replaced, i]})
+            //     }
+            }
+        // }
         replacements = new_replacements
     }
     return {seq: null, colliding_names: all_colliding_names}
@@ -222,7 +253,7 @@ function try_remove_patterns(seq, patterns, code, n_mismatches=1) {
 
     const exact_fits = fits.filter(f => f.exact)
     let history = []
-    for (efit of exact_fits) {
+    for (let efit of exact_fits) {
         // if the sequence is already destroyed
         if (!seq.substring(efit.start, efit.end).match(iupac_re(efit.pattern.seq)))
             continue
