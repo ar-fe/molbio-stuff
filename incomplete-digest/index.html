@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="styles.css">
+    <title>Gel Electrophoresis Simulator</title>
+</head>
+<body>
+    <div class="left-pane">
+        <div class="horz" style="justify-content: space-between;">
+            <span>Your DNA sequence 
+                (<input type="radio" id="lin" name="circ-lin"><label for="lin">linear</label>
+                <input type="radio" id="circ" name="circ-lin" checked><label for="circ">circular</label>,
+                <span class="action-link" id="clear-seq-btn">clear</span>):
+            </span>
+            <div class="horz" style="font-size: 14pt; width: initial;">
+                <label><input type="checkbox" id="dam" checked> dam<sup>+</sup></label>
+                <label><input type="checkbox" id="dcm" checked> dcm<sup>+</sup></label>
+            </div>
+        </div>
+        <textarea id="seq"></textarea>
+        <div class="horz">
+            <span>Restriction enzymes and their efficiencies:</span>
+        </div>
+        <div class="horz">
+            <div class="re-box">
+                <div class="horz-narrow">
+                    <input type="text" style="flex-grow: 1; width: 0">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="2.5 2.5 10 10" class="clear-enzyme-btn">
+                        <path fill-rule="evenodd" clip-rule="evenodd" d="M6.79289 7.49998L4.14645 4.85353L4.85355 4.14642L7.5 6.79287L10.1464 4.14642L10.8536 4.85353L8.20711 7.49998L10.8536 10.1464L10.1464 10.8535L7.5 8.20708L4.85355 10.8535L4.14645 10.1464L6.79289 7.49998Z"></path>
+                    </svg>
+                </div>
+                <select class="re-list" size="5" tabindex="-1"></select>
+                <select class="re-eff" disabled tabindex="-1"></select>
+            </div>
+            <div class="re-box">
+                <div class="horz-narrow">
+                    <input type="text" style="flex-grow: 1; width: 0">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="2.5 2.5 10 10" class="clear-enzyme-btn">
+                        <path fill-rule="evenodd" clip-rule="evenodd" d="M6.79289 7.49998L4.14645 4.85353L4.85355 4.14642L7.5 6.79287L10.1464 4.14642L10.8536 4.85353L8.20711 7.49998L10.8536 10.1464L10.1464 10.8535L7.5 8.20708L4.85355 10.8535L4.14645 10.1464L6.79289 7.49998Z"></path>
+                    </svg>
+                </div>
+                <select class="re-list" size="5" tabindex="-1"></select>
+                <select class="re-eff" disabled tabindex="-1"></select>
+            </div>
+            <div class="re-box">
+                <div class="horz-narrow">
+                    <input type="text" style="flex-grow: 1; width: 0">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="2.5 2.5 10 10" class="clear-enzyme-btn">
+                        <path fill-rule="evenodd" clip-rule="evenodd" d="M6.79289 7.49998L4.14645 4.85353L4.85355 4.14642L7.5 6.79287L10.1464 4.14642L10.8536 4.85353L8.20711 7.49998L10.8536 10.1464L10.1464 10.8535L7.5 8.20708L4.85355 10.8535L4.14645 10.1464L6.79289 7.49998Z"></path>
+                    </svg>
+                </div>
+                <select class="re-list" size="5" tabindex="-1"></select>
+                <select class="re-eff" disabled tabindex="-1"></select>
+            </div>
+            <div class="re-box">
+                <div class="horz-narrow">
+                    <input type="text" style="flex-grow: 1; width: 0">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="2.5 2.5 10 10" class="clear-enzyme-btn">
+                        <path fill-rule="evenodd" clip-rule="evenodd" d="M6.79289 7.49998L4.14645 4.85353L4.85355 4.14642L7.5 6.79287L10.1464 4.14642L10.8536 4.85353L8.20711 7.49998L10.8536 10.1464L10.1464 10.8535L7.5 8.20708L4.85355 10.8535L4.14645 10.1464L6.79289 7.49998Z"></path>
+                    </svg>
+                </div>
+                <select class="re-list" size="5" tabindex="-1"></select>
+                <select class="re-eff" disabled tabindex="-1"></select>
+            </div>
+        </div>
+        <div class="horz">
+            <span style="font-size: 14pt;">MW standard:</span>
+            <div>
+                <select id="mw-standard" style="width: auto; font-size: 14pt;"></select><span style="font-size: 14pt;">,</span>
+            </div>
+            <select id="gel-pct" style="width: auto; font-size: 14pt;"></select>
+            <span style="font-size: 14pt;">TAE gel</span>
+        </div>
+    </div>
+    <div class="right-pane">
+        <svg id="gel" version="1.1" viewbox="0 0 8 32" xmlns="http://www.w3.org/2000/svg">
+            <rect width="8" height="32" fill="#d4d4d4" />
+            <rect x="1.25" y="1.5" width="2" height=".6" fill="#eee" />
+            <rect x="4.5" y="1.5" width="2" height=".6" fill="#eee" />
+            <g id="left-lane" class="gel-lane" transform="translate(1.25, 2.1)"></g>
+            <g id="right-lane" class="gel-lane" transform="translate(4.5, 2.1)"></g>
+            <text id="question-mark" x="5.5" y="2.1" dominant-baseline="middle" text-anchor="middle" fill="rgba(0, 0, 0, 0)">?</text>
+        </svg>
+        <input type="range" id="gel-time" value="25" step="0.1"/>
+    </div>
+    <script src="REs.js"></script>
+    <script src="gel.js"></script>
+</body>
+</html>
