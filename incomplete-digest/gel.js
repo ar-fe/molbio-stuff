@@ -678,7 +678,7 @@ const attachEnzymeDropdownClickHandlers = () => {
         dropdownElement.addEventListener('click', e => {
             const inputElement = e.currentTarget.parentElement.querySelector('input');
             if (dropdownElement.selectedIndex >= 0) {
-                inputElement.value = dropdownElement.options[dropdownElement.selectedIndex].value;
+                inputElement.value = REs[dropdownElement.options[dropdownElement.selectedIndex].value].name;
                 inputElement.dispatchEvent(new Event('input'));
             }
         });
@@ -722,7 +722,7 @@ const attachEnzymeInputHandlers = () => {
                 const dropdownElement = inputElement.parentElement.parentElement.querySelector('.re-list');
                 const visibleOptions = Array.from(dropdownElement.options).filter(opt => !opt.hidden);
                 if (visibleOptions.length > 0) {
-                    inputElement.value = visibleOptions[0].value;
+                    inputElement.value = REs[visibleOptions[0].value].name;
                     inputElement.dispatchEvent(new Event('input'));
                 }
             }
