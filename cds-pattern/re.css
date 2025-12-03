@@ -13,7 +13,7 @@ body {
 #wrapper {
     width: 100%;
     height: 100vh;
-    padding: 2.5% 5%;
+    padding: calc(4 * var(--gaps));
     box-sizing: border-box;
     display: flex;
     flex-direction: row;
