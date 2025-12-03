@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <title>CDS subsequence inserter</title>
+    <link rel="icon" href="favicon.png">
     <link rel="stylesheet" href="re.css">
 </head>
 <body>
@@ -12,7 +13,7 @@
                 <input type="radio" id="in-cds-radio" name="input-type" checked><label for="in-cds-radio">coding sequence</label><span class="rev-comp-link"> (<span class="action-link" onclick="rev_comp_input()">reverse complement the input</span>,
                 <input type="checkbox" name="codon-optimize" id="codon-optimize"><label for="codon-optimize">codon optimize</label>)</span>:</div>
             <textarea id="in-seq" placeholder="Original sequence. Press Ctrl-Enter to process"></textarea>
-            <div>
+            <div class="noselect">
                 Use the
                 <select id="gen-code">
                     <optgroup label="1. Standard (codon frequencies):"></optgroup>
@@ -73,7 +74,7 @@
                         <path fill-rule="evenodd" clip-rule="evenodd" d="M6.79289 7.49998L4.14645 4.85353L4.85355 4.14642L7.5 6.79287L10.1464 4.14642L10.8536 4.85353L8.20711 7.49998L10.8536 10.1464L10.1464 10.8535L7.5 8.20708L4.85355 10.8535L4.14645 10.1464L6.79289 7.49998Z"></path>
                     </svg>
                 </div>
-                <table id="restriction-enzymes" style="flex: 1; display: block; overflow-y: scroll;"></table>
+                <table id="restriction-enzymes" class="noselect" style="flex: 1; display: block; overflow-y: scroll;"></table>
             </div>
         </div>
     </div>
