@@ -1,4 +1,4 @@
-class Pattern {
+﻿class Pattern {
     constructor(name, pattern_seq) {
         this.name = name
         this.seq = pattern_seq

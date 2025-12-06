@@ -127,31 +127,48 @@ function add_status_string(str) {
 }
 
 function run_insert(seq, patterns, code) {
+    const t0 = performance.now()
     let fits = try_insert_patterns(seq, patterns, code)
+    const t1 = performance.now()
     fits.sort((f1, f2) => ((f1.pos - f2.pos) == 0) ? (f1.pattern.name.localeCompare(f2.pattern.name)) : (f1.pos - f2.pos))
     fits.map(fit => result_tr(fit, highlight_site_insert(seq, fit))).forEach(tr => document.querySelector('table').appendChild(tr))
     if (fits.length == 0) {
         add_status_string('<span style="color: red;">Nothing found :(</span>')
+    } else {
+        add_status_string(`<span style="color: green;">Inserted ${fits.length} sequence(s) in ${Math.round(t1 - t0) / 1000} s</span>`)
     }
 }
 
 function run_remove(seq, patterns, code) {
+    const t0 = performance.now()
     let history = try_remove_patterns(seq, patterns, code, +document.querySelector('#n-replacements').value, code)
-    history.map(record => result_tr(record.efit, highlight_site_remove(seq, record))).forEach(tr => document.querySelector('table').appendChild(tr))
+    const t1 = performance.now()
+    const only_last_step = document.getElementById('only-last-step').checked
+    const history_len = history.length
+    if (only_last_step && history.length > 1) {
+        history = [history[history.length - 1]]
+        if (history[0].success)
+            document.querySelector('table').appendChild(result_tr(new Fit(new Pattern('Final sequence', ''), 0, seq.length, ''), seq))
+        else
+            document.querySelector('table').appendChild(result_tr(history[0].efit, highlight_site_remove(seq, history[0])))
+    } else {
+        history.map(record => result_tr(record.efit, highlight_site_remove(seq, record)))
+        .forEach(tr => document.querySelector('table').appendChild(tr))
+    }
     let last = history[history.length - 1]
     if (history.length > 0 && last.success == true)
-        add_status_string(`<span style="color: green;">Succesfully removed ${history.length} sequence(s)</span>`)
+        add_status_string(`<span style="color: green; white-space: normal;">Succesfully removed ${history_len} sequence(s) in ${Math.round(t1 - t0) / 1000} s</span>`)
     else if(history.length == 0)
-        add_status_string(`<span style="color: green;">Nothing to remove</span>`)
+        add_status_string(`<span style="color: green; white-space: normal;">Nothing to remove</span>`)
     else {
         let len = Array.from(last.collisions).length
         if (len === 1 && last.collisions.has(last.efit.pattern.name))
-            add_status_string(`<span style="color: red;">Unable to remove "${last.efit.pattern.name}"</span>`)
+            add_status_string(`<span style="color: red; white-space: normal;">Unable to remove ${last.efit.pattern.name}</span>`)
         else {
             last.collisions.delete(last.efit.pattern.name)
             let extra_collisions = Array.from(last.collisions)
-            add_status_string(`<span style="color: red;">Unable to remove "${last.efit.pattern.name}"` + 
-                ` (collision(s) with ${extra_collisions.join(', ')})</span>`)
+            add_status_string(`<span style="color: red; white-space: normal;">Unable to remove ${last.efit.pattern.name}, ` + 
+                `collision(s) with ${extra_collisions.join(', ')} (run time ${Math.round(t1 - t0) / 1000} s)</span>`)
         }
     }
 }
