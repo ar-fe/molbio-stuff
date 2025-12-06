@@ -1,4 +1,4 @@
-﻿class Pattern {
+class Pattern {
     constructor(name, pattern_seq) {
         this.name = name
         this.seq = pattern_seq
@@ -148,58 +148,78 @@ function try_insert_patterns(seq, patterns, code) {
 
 
 
-function try_replace_codons(seq, patterns_re, pattern, code, n_mismatches=1) {
-    function num_mismatches(seq, pattern) {        
-        const nuc_mismatches = {
-            'A': 'CGT', 'C': 'AGT', 'G': 'ACT', 'T': 'ACG', 'R': 'CT', 'Y': 'AG', 'S': 'AT', 'W': 'CG',
-            'K': 'AC', 'M': 'GT', 'B': 'A', 'D': 'C', 'H': 'G', 'V': 'T', 'N': ''
-        }
-        let n_mm = 0
-        for (let i = 0; i < seq.length; i++)
-            if (nuc_mismatches[pattern[i]].includes(seq[i]))
-                n_mm++;
-        return n_mm
+function* replacement_idx_bfs(n) {
+    let q = Array.from({length: n}, (_, i) => [i]);
+    while (q.length) {
+        let c = q.shift();
+        yield c;
+        let l = c[c.length - 1];
+        for (let i = l + 1; i < n; i++) q.push([...c, i]);
     }
-    let ncodons = seq.length / 3
-    let replacements = [{seqs: [seq], replaced: []}]
-    let all_colliding_names = new Set()
-    while (replacements.length > 0) {
-        let new_replacements = []
-        for (const replacement of replacements) {
-            const seqs = replacement.seqs
-            const replaced = replacement.replaced
-            let id_start = 0
-            if (replaced.length > 0)
-                id_start = replaced[replaced.length - 1] + 1
-            if (id_start >= ncodons)
-                continue
-            for (let i = id_start; i < ncodons; i++) {
-                for (let s of seqs) {
-                    let new_seqs = []
-                    const codon = s.slice(i * 3, i * 3 + 3)
-                    let aa = code.code[codon]
-                    for (let new_codon of code.codons(aa)) {
-                        if (new_codon == codon)
-                            continue
-                        let new_seq = s.slice(0, i * 3) + new_codon + s.slice(i * 3 + 3)
-                        let matches = patterns_re.filter(p => new_seq.match(p.pattern))
-                        if (matches.length == 0) {
-                            if (n_mismatches == 1 || num_mismatches(new_seq, pattern) >= n_mismatches)
-                                return {seq: new_seq, colliding_names: null};
-                        }
-                        let colliding_names = new Set(matches.map(c => c.name))
-                        for (const n of colliding_names) all_colliding_names.add(n)
-                        new_seqs.push(new_seq)
-                    }
-                    if (new_seqs.length > 0) {
-                        new_replacements.push({seqs: new_seqs, replaced: [...replaced, i]})
-                    }
-                }
+}
+
+function* replacement_seqs(seq, idx, code) {
+    const sortedIndices = [...idx].sort((a, b) => a - b);
+    const codonAlternatives = [];
+
+    for (const i of sortedIndices) {
+        const codon = seq.slice(i * 3, i * 3 + 3);
+        const aa = code.code[codon];
+        if (!aa) return;
+        const alts = code.codons(aa).filter(c => c !== codon);
+        if (alts.length === 0) return;
+        codonAlternatives.push(alts);
+    }
+
+    const n = codonAlternatives.length;
+    const counters = new Array(n).fill(0);
+
+    while (true) {
+        let newSeq = seq;
+        for (let k = n - 1; k >= 0; k--) {
+            const pos = sortedIndices[k] * 3;
+            newSeq = newSeq.slice(0, pos) + codonAlternatives[k][counters[k]] + newSeq.slice(pos + 3);
+        }
+        yield newSeq;
+
+        let i = n - 1;
+        while (i >= 0) {
+            counters[i]++;
+            if (counters[i] < codonAlternatives[i].length) break;
+            counters[i] = 0;
+            i--;
+        }
+        if (i < 0) break;
+    }
+}
+
+function try_replace_codons(seq, patterns_re, pattern, code, n_mismatches = 1) {
+    function num_mismatches(s, p) {
+        const m = {
+            'A': 'CGT', 'C': 'AGT', 'G': 'ACT', 'T': 'ACG',
+            'R': 'CT', 'Y': 'AG', 'S': 'AT', 'W': 'CG',
+            'K': 'AC', 'M': 'GT', 'B': 'A', 'D': 'C',
+            'H': 'G', 'V': 'T', 'N': ''
+        };
+        let c = 0;
+        for (let i = 0; i < s.length; i++)
+            if (m[p[i]].includes(s[i])) c++;
+        return c;
+    }
+    let n = seq.length / 3;
+    let all = new Set();
+    for (let idx of replacement_idx_bfs(n)) {
+        for (let new_seq of replacement_seqs(seq, idx, code)) {
+            let matches = patterns_re.filter(p => new_seq.match(p.pattern));
+            if (!matches.length) {
+                if (n_mismatches == 1 || num_mismatches(new_seq, pattern) >= n_mismatches)
+                    return { seq: new_seq, colliding_names: null };
+            } else {
+                matches.forEach(p => all.add(p.name));
             }
         }
-        replacements = new_replacements
     }
-    return {seq: null, colliding_names: all_colliding_names}
+    return { seq: null, colliding_names: all };
 }
 
 function collision_patterns_re(collisions, code_left, code_right) {
@@ -207,18 +227,28 @@ function collision_patterns_re(collisions, code_left, code_right) {
     function block_pattern(fit, rc=false) {
         return '.'.repeat(fit.start - code_left) + iupac_re(fit.pattern.seq) + '.'.repeat(code_right - (fit.end))
     }
-    for (fit of collisions)
+
+    for (let fit of collisions)
         res.add({pattern: block_pattern(fit), name: fit.pattern.name})
     return Array.from(res)
 }
 
 function try_remove_patterns(seq, patterns, code, n_mismatches=1) {
-    const fits = try_insert_patterns(seq, patterns, code).slice().sort((f1, f2) => f1.start - f2.start)
+    const fits = (
+        try_insert_patterns(seq, patterns, code)
+        .slice()
+        .sort((f1, f2) => f1.start - f2.start)
+        .map(fit => ({
+            ...fit,
+            code_left: fit.start - (fit.start % 3),
+            code_right: fit.end + ((fit.end % 3 == 0) ? 0 : (3 - fit.end % 3))
+        }))
+    )
     function find_colliding_fits(efit) {
-        const coll = fits.filter(f => ((f.start >= efit.start) && (f.start < efit.end)) ||
-                                      ((f.end >= efit.start)   && (f.end < efit.end)) ||
-                                      ((efit.start >= f.start) && (efit.start < f.end)) ||
-                                      ((efit.end >= f.start)   && (efit.end < f.end)))
+        const coll = fits.filter(f => ((f.code_left >= efit.code_left) && (f.code_left < efit.code_right))   ||
+                                      ((f.code_right > efit.code_left) && (f.code_right <= efit.code_right)) ||
+                                      ((efit.code_left >= f.code_left) && (efit.code_left < f.code_right))   ||
+                                      ((efit.code_right > f.code_left) && (efit.code_right <= f.code_right)))
         return Array.from(new Set(coll))
     }
 
@@ -229,17 +259,15 @@ function try_remove_patterns(seq, patterns, code, n_mismatches=1) {
         if (!seq.substring(efit.start, efit.end).match(iupac_re(efit.pattern.seq)))
             continue
         const collisions = find_colliding_fits(efit)
-        const block_left = Math.min(efit.start, ...collisions.map(f => f.start)),
-              block_right = Math.max(efit.end, ...collisions.map(f => f.end))
         // full codons containing the collision block
-        const code_left = block_left - (block_left % 3),
-              code_right = block_right + ((block_right % 3 == 0) ? 0 : (3 - block_right % 3))
+        const code_left = Math.min(efit.code_left, ...collisions.map(f => f.code_left)),
+              code_right = Math.max(efit.code_right, ...collisions.map(f => f.code_right))
         const patterns_re = collision_patterns_re(collisions, code_left, code_right)
         const pattern = 'N'.repeat(efit.start - code_left) + efit.pattern.seq + 'N'.repeat(code_right - efit.end)
         
         let new_replacement = try_replace_codons(seq.slice(code_left, code_right), patterns_re, pattern, code, n_mismatches)
         let new_seq = new_replacement.seq
-        if(new_seq !== null)
+        if (new_seq !== null)
             seq = seq.slice(0, code_left) + new_seq + seq.slice(code_right)
         let record = {
             seq: seq,
